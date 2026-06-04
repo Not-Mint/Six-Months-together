@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bg-container">
+        <div class="glow-blob one"></div>
+        <div class="glow-blob two"></div>
+    </div>
+    
+    <canvas id="particles"></canvas>
+    <div class="cursor-glow"></div>
+
+    <div class="container" id="main-content">
+        <div class="photo-frame">
+            <img src="" id="photo-img" alt="Cute Photo">
+        </div>
+        <h1 class="title-text cute-font" id="intro-text"></h1>
+        <div class="btn-group">
+            <button class="btn" id="btn-yes"></button>
+            <button class="btn" id="btn-no"></button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const photoImg = document.getElementById("photo-img");
+            const introText = document.getElementById("intro-text");
+            const btnYes = document.getElementById("btn-yes");
+            const btnNo = document.getElementById("btn-no");
+
+            // Populate content
+            photoImg.src = CONFIG.page1.introPhoto;
+            btnYes.innerText = CONFIG.page1.yesButtonText;
+            btnNo.innerText = CONFIG.page1.noButtonText;
+
+            // Split text for word-by-word reveal
+            const text = CONFIG.page1.introText;
+            introText.innerHTML = text.split(" ").map(word => `<span class="word"><span class="inner">${word}</span>&nbsp;</span>`).join("");
+
+            // Cinematic Entrance Timeline
+            const tl = gsap.timeline({ delay: 0.5 });
+            
+            tl.set(".title-text", { opacity: 1 }) // Ensure text container is visible
+            .fromTo(".photo-frame", 
+                { y: 100, opacity: 0, scale: 0.8, rotate: 5 }, 
+                { y: 0, opacity: 1, scale: 1, rotate: -3, duration: 2, ease: "expo.out" }
+            )
+            .fromTo(".word .inner", 
+                { y: "110%" }, 
+                { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 }, 
+                "-=1.2"
+            )
+            .fromTo(".btn-group", 
+                { y: 50, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 1, ease: "back.out(1.7)" }, 
+                "-=0.8"
+            );
+
+            // Magnetic Buttons
+            const buttons = document.querySelectorAll(".btn");
+            buttons.forEach(btn => {
+                btn.addEventListener("mousemove", (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+                    const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+                    gsap.to(btn, { x, y, duration: 0.3 });
+                });
+                btn.addEventListener("mouseleave", () => {
+                    gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+                });
+            });
+
+            btnNo.addEventListener("click", () => {
+                gsap.to("body", { opacity: 0, scale: 1.1, filter: "blur(20px)", duration: 1, onComplete: () => {
+                    window.location.href = "page_no.html";
+                }});
+            });
+
+            btnYes.addEventListener("click", () => {
+                gsap.to("body", { opacity: 0, scale: 0.9, filter: "blur(20px)", duration: 1, onComplete: () => {
+                    sessionStorage.setItem("musicPlaying", "true");
+                    window.location.href = "page2.html";
+                }});
+            });
+        });
+    </script>
+</body>
+</html>

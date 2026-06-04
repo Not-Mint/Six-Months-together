@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .letter-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(255, 143, 177, 0.12);
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .letter-photo {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto 1.5rem auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .letter-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-container">
+        <div class="glow-blob one"></div>
+        <div class="glow-blob two"></div>
+    </div>
+    
+    <canvas id="particles"></canvas>
+
+    <div class="container">
+        <div class="letter-container" id="letter-content">
+            <img src="" id="letter-image" class="letter-photo" alt="Letter">
+            <div class="pagination">
+                <button class="btn" id="btn-prev">⬅ Back</button>
+                <button class="btn" id="btn-next">Next Page ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const letters = CONFIG.page4.letters;
+            let currentIndex = 0;
+
+            const content = document.getElementById("letter-content");
+            const imageElem = document.getElementById("letter-image");
+            const btnPrev = document.getElementById("btn-prev");
+            const btnNext = document.getElementById("btn-next");
+
+            function updatePage(index, direction) {
+                const yMove = direction === 'next' ? -20 : 20;
+                
+                gsap.to(content, {
+                    opacity: 0, 
+                    y: yMove, 
+                    duration: 0.5, 
+                    onComplete: () => {
+                        imageElem.src = letters[index].photo;
+                        
+                        // Update buttons
+                        btnPrev.style.visibility = (index === 0) ? "hidden" : "visible";
+                        btnNext.innerHTML = (index === letters.length - 1) ? "Continue ➔" : "Next Page ➔";
+
+                        gsap.fromTo(content, 
+                            { opacity: 0, y: -yMove }, 
+                            { opacity: 1, y: 0, duration: 0.5 }
+                        );
+                    }
+                });
+            }
+
+            // Initial load
+            imageElem.src = letters[0].photo;
+            btnPrev.style.visibility = "hidden";
+            gsap.to(content, {opacity: 1, y: 0, duration: 1.5, ease: "power3.out"});
+
+            btnNext.addEventListener("click", () => {
+                if (currentIndex < letters.length - 1) {
+                    currentIndex++;
+                    updatePage(currentIndex, 'next');
+                } else {
+                    gsap.to("body", { opacity: 0, duration: 1, onComplete: () => {
+                        window.location.href = "page5.html";
+                    }});
+                }
+            });
+
+            btnPrev.addEventListener("click", () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updatePage(currentIndex, 'prev');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

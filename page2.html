@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Secret Code ❤️</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bg-container">
+        <div class="glow-blob one"></div>
+        <div class="glow-blob two"></div>
+    </div>
+    
+    <canvas id="particles"></canvas>
+    <div class="cursor-glow"></div>
+
+    <div class="container">
+        <div class="split-layout">
+            <!-- Left Side: Photo -->
+            <div class="photo-frame" id="side-photo-container">
+                <img src="" id="side-photo" alt="Secret Memory">
+            </div>
+
+            <!-- Right Side: Keypad -->
+            <div class="keypad-container" id="keypad-container">
+                <h2 class="cute-font" style="margin-bottom: 1.5rem; font-size: 1.8rem; color: var(--accent-primary);">Enter Secret Code</h2>
+                <div class="password-display" id="password-display">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div class="keypad-grid">
+                    <div class="key" data-val="1">1</div>
+                    <div class="key" data-val="2">2</div>
+                    <div class="key" data-val="3">3</div>
+                    <div class="key" data-val="4">4</div>
+                    <div class="key" data-val="5">5</div>
+                    <div class="key" data-val="6">6</div>
+                    <div class="key" data-val="7">7</div>
+                    <div class="key" data-val="8">8</div>
+                    <div class="key" data-val="9">9</div>
+                    <div class="key" id="key-clear">C</div>
+                    <div class="key" data-val="0">0</div>
+                    <div class="key" id="key-del">⌫</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Dialogs -->
+    <div class="dialog-overlay" id="dialog-overlay">
+        <div class="dialog-box" id="dialog-box">
+            <h2 class="dialog-title cute-font" id="dialog-title"></h2>
+            <p class="dialog-msg" id="dialog-msg"></p>
+            <button class="btn" id="dialog-btn"></button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const sidePhoto = document.getElementById("side-photo");
+            sidePhoto.src = CONFIG.page2.sidePhoto;
+
+            // Cinematic Entrance
+            const tl = gsap.timeline({ delay: 0.5 });
+            tl.fromTo("#side-photo-container", 
+                { x: -100, opacity: 0, rotate: -10 }, 
+                { x: 0, opacity: 1, rotate: -3, duration: 1.5, ease: "power4.out" }
+            )
+            .fromTo("#keypad-container", 
+                { x: 100, opacity: 0 }, 
+                { x: 0, opacity: 1, duration: 1.5, ease: "power4.out" }, 
+                "-=1.2"
+            );
+
+            // Keypad Logic
+            let input = "";
+            const dots = document.querySelectorAll(".dot");
+            const keys = document.querySelectorAll(".key[data-val]");
+            const clearBtn = document.getElementById("key-clear");
+            const delBtn = document.getElementById("key-del");
+
+            function updateDots() {
+                dots.forEach((dot, i) => {
+                    if (i < input.length) dot.classList.add("active");
+                    else dot.classList.remove("active");
+                });
+            }
+
+            keys.forEach(key => {
+                key.addEventListener("click", () => {
+                    if (input.length < 6) {
+                        input += key.getAttribute("data-val");
+                        updateDots();
+                        if (input.length === 6) checkPassword();
+                    }
+                });
+            });
+
+            clearBtn.addEventListener("click", () => {
+                input = "";
+                updateDots();
+            });
+
+            delBtn.addEventListener("click", () => {
+                input = input.slice(0, -1);
+                updateDots();
+            });
+
+            function checkPassword() {
+                if (input === CONFIG.page2.password) {
+                    showDialog(true);
+                } else {
+                    showDialog(false);
+                }
+            }
+
+            // Dialog Logic
+            const overlay = document.getElementById("dialog-overlay");
+            const box = document.getElementById("dialog-box");
+            const dTitle = document.getElementById("dialog-title");
+            const dMsg = document.getElementById("dialog-msg");
+            const dBtn = document.getElementById("dialog-btn");
+
+            function showDialog(isSuccess) {
+                if (isSuccess) {
+                    dTitle.innerText = CONFIG.page2.successTitle;
+                    dMsg.innerText = CONFIG.page2.successMsg;
+                    dBtn.innerText = CONFIG.page2.successBtn;
+                    dBtn.onclick = () => {
+                        gsap.to("body", { opacity: 0, duration: 1, onComplete: () => {
+                            window.location.href = "page3.html";
+                        }});
+                    };
+                } else {
+                    dTitle.innerText = CONFIG.page2.failTitle;
+                    dMsg.innerText = CONFIG.page2.failMsg;
+                    dBtn.innerText = CONFIG.page2.failBtn;
+                    dBtn.onclick = () => {
+                        closeDialog();
+                        input = "";
+                        updateDots();
+                    };
+                }
+
+                overlay.style.display = "flex";
+                gsap.to(overlay, { opacity: 1, duration: 0.5 });
+                gsap.to(box, { scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+            }
+
+            function closeDialog() {
+                gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete: () => {
+                    overlay.style.display = "none";
+                }});
+                gsap.to(box, { scale: 0.8, duration: 0.3 });
+            }
+
+            // Magnetic Keys
+            const allKeys = document.querySelectorAll(".key");
+            allKeys.forEach(key => {
+                key.addEventListener("mousemove", (e) => {
+                    const rect = key.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+                    const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+                    gsap.to(key, { x, y, duration: 0.3 });
+                });
+                key.addEventListener("mouseleave", () => {
+                    gsap.to(key, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
